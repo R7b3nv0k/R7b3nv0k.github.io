@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="hu">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="https://fonts.cdnfonts.com/css/devil" rel="stylesheet">
+        <title>Tetris</title>
+        <style>
+    html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        background: linear-gradient(135deg, #1a0000, #3a003a); /* Vörös és sötét árnyalatok */
+        font-family: 'Devil', sans-serif; /* Gothic font */
+        color: #e60000; /* Vérvörös szín */
+        overflow: hidden;
+    }
+
+    h1 {
+    font-size: 6rem; /* Növeljük a felirat méretét */
+    color: transparent;
+    text-align: center;
+    font-family: 'Devil', sans-serif;
+    -webkit-text-stroke: 3px #ff0000; /* Vörös szegély */
+    text-shadow: 0 0 15px #ff0000, 0 0 25px #ff0000, 0 0 50px #ff0000, 0 0 75px #ff0000; /* Vörös fények */
+    transition: 0.3s ease-in-out;
+    cursor: pointer;
+}
+
+    h1:hover {
+        color: #ff0000;
+        text-shadow: 0 0 10px #ff6600, 0 0 20px #ff6600, 0 0 30px #ff6600; /* Félelmetes vörös árnyék */
+    }
+
+    button {
+        background: #3a003a;
+        border: 2px solid #ff0000;
+        border-radius: 12px;
+        color: #ff0000;
+        padding: 15px 25px;
+        font-size: 18px;
+        cursor: pointer;
+        text-transform: uppercase;
+        transition: 0.3s ease-in-out;
+        box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
+    }
+
+    button:hover {
+        background: #660033;
+        color: white;
+        box-shadow: 0 0 25px rgba(255, 0, 0, 0.8);
+    }
+
+    /* Pontszám és szövegek stílusa */
+    #score-box p,
+    #menu,
+    #game-over p {
+        color: #ffcccc;
+        font-size: 1.5rem;
+        text-shadow: 0 0 10px #ff6600, 0 0 20px #ff6600;
+    }
+
+    #canvas-container {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+        background: rgba(0, 0, 0, 0.7); /* Sötétebb háttér */
+        padding: 20px;
+        border-radius: 15px;
+        box-shadow: 0 0 20px rgba(255, 0, 0, 0.2);
+    }
+
+    canvas {
+        border: 3px solid #ff0000;
+        box-shadow: 0 0 15px #ff0000, 0 0 30px #ff6600;
+        background-color: black;
+        display: block;
+        margin: 0 auto;
+    }
+
+    #next-piece-box p {
+        color: #ffcccc;
+        font-size: 1.2rem;
+        text-shadow: 0 0 10px #ff6600, 0 0 20px #ff6600;
+    }
+
+    #score {
+        color: white;
+        text-align: center;
+        font-size: 20px;
+        margin-top: 10px;
+    }
+
+    #menu, #game-over {
+        color: white;
+        text-align: center;
+        font-size: 24px;
+        margin-top: 50px;
+    }
+
+    #start-button, #restart-button {
+        font-size: 20px;
+        padding: 10px 20px;
+        cursor: pointer;
+        background-color: #660033;
+        border: none;
+        color: white;
+        border-radius: 5px;
+        text-align: center;
+    }
+
+    #start-button:hover, #restart-button:hover {
+        background-color: #ff0000;
+    }
+
+    #score-box {
+        text-align: center;
+        font-size: 30px;
+        margin: 20px 0;
+    }
+
+    #canvas-container {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        margin-top: 20px;
+    }
+
+    #next-piece-box {
+        text-align: center;
+        margin-left: 10px; /* Kicsi távolság a játéktér és a következő tetrominó között */
+    }
+
+    #controls-info {
+        display: none;
+        color: #ffcccc;
+        font-size: 18px;
+        margin-top: 20px;
+        position: absolute;
+        top: 50%;
+        right: 20px;
+        transform: translateY(-50%);
+        text-align: left;
+        background-color: rgba(0, 0, 0, 0.7);
+        padding: 15px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+    }
+        </style>
+    </head>
+    <body>
+        <div id="menu">
+            <h1>TETRIS</h1>
+            <button id="start-button">Play</button>
+            <button id="controls-button">Controls</button>
+            <button onclick="window.location.href='szintek.html';">Back</button>
+            <div id="controls-info" style="display: none; color: #ffcccc; font-size: 18px; margin-top: 20px;">
+                <p><strong>Controls:</strong></p>
+                <ul>
+                    <li><strong>A:</strong> Move left</li>
+                    <li><strong>D:</strong> Move right</li>
+                    <li><strong>S:</strong> Soft drop</li>
+                    <li><strong>W:</strong> Rotate tetromino</li>
+                    <li><strong>Space:</strong> Hard drop tetromino</li>
+                    
+                </ul>
+            </div>
+        </div>
+        
+        <div id="game-over" style="display: none;">
+            <h1>End...</h1>
+            <p id="final-score"></p>
+            <button id="restart-button">Back to the menu</button>
+        </div>
+
+        <div id="score-box" style="display: none;"><p style="color:white;">Score: 0</p></div>
+        <div style="display: flex; justify-content: center; align-items: flex-start; margin-top: 20px;">
+            <div id="canvas-container">
+                <canvas id="tetris" width="400" height="800" style="display: none;"></canvas>
+                <div id="next-piece-box" style="display: none; text-align: center;">
+                    <p style="color: white;">Next piece:</p>
+                    <canvas id="next-piece" width="132" height="132"></canvas>
+                    <button id="back-button" style="display: none; margin-top: 20px;">Back</button>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
+        
+        
+        <script>
+            const backButton = document.getElementById('back-button');
+
+document.getElementById('start-button').addEventListener('click', () => {
+    document.getElementById('menu').style.display = 'none';
+    document.getElementById('tetris').style.display = 'block';
+    document.getElementById('score-box').style.display = 'block';
+    document.getElementById('next-piece-box').style.display = 'block';
+    backButton.style.display = 'block'; // Megjelenítjük a "Vissza" gombot
+    startGame();
+});
+
+backButton.addEventListener('click', () => {
+    // Leállítjuk a játékot és visszatérünk a főmenübe
+    gameOver = true; // Biztosítjuk, hogy az update ne fusson tovább
+    document.getElementById('menu').style.display = 'block';
+    document.getElementById('tetris').style.display = 'none';
+    document.getElementById('score-box').style.display = 'none';
+    document.getElementById('next-piece-box').style.display = 'none';
+    backButton.style.display = 'none'; // Elrejtjük a "Vissza" gombot
+});
+
+document.getElementById('controls-button').addEventListener('click', () => {
+    const controlsInfo = document.getElementById('controls-info');
+    if (controlsInfo.style.display === 'none') {
+        controlsInfo.style.display = 'block';
+    } else {
+        controlsInfo.style.display = 'none';
+    }
+});
+
+
+const canvas = document.getElementById('tetris');
+const context = canvas.getContext('2d');
+context.scale(33, 33);
+
+// Új canvas a következő tetrominó számára
+const nextCanvas = document.getElementById('next-piece');
+const nextContext = nextCanvas.getContext('2d');
+nextContext.scale(33, 33);
+
+const tetrominos = {
+    T: { shape: [[0, 1, 0], [1, 1, 1]], color: '#9b00b3', darkColor: '#7a007a' }, // dark purple
+    O: { shape: [[1, 1], [1, 1]], color: '#800000', darkColor: '#660000' }, // dark red
+    L: { shape: [[0, 0, 1], [1, 1, 1]], color: '#e3dac9', darkColor: '#cc6600' }, // dark orange
+    J: { shape: [[1, 0, 0], [1, 1, 1]], color: '#003366', darkColor: '#001a33' }, // dark blue
+    S: { shape: [[0, 1, 1], [1, 1, 0]], color: '#006400', darkColor: '#003300' }, // dark green
+    Z: { shape: [[1, 1, 0], [0, 1, 1]], color: '#4B3C3A', darkColor: '#660000' }, // dark red
+    I: { shape: [[1, 1, 1, 1]], color: '#000000', darkColor: '#333333' }, // black
+    P: { shape: [[1, 1, 1], [0, 1, 0], [0, 1, 0]], color: '#ff66b2', darkColor: '#ff3385' }, // dark pink
+    U: { shape: [[1, 0, 1], [1, 1, 1]], color: '#004F4F', darkColor: '#001a33' } // dark light blue
+};
+
+
+function createMatrix(width, height) {
+    const matrix = [];
+    while (height--) {
+        matrix.push(new Array(width).fill(0));
+    }
+    return matrix;
+}
+
+const arena = createMatrix(12, 24);
+
+function randomTetromino() {
+    const tetrominoes = 'TOLJSZIPU';
+    const randomLetter = tetrominoes[Math.floor(Math.random() * tetrominoes.length)];
+    return tetrominos[randomLetter];
+}
+
+const player = {
+    pos: { x: 0, y: 0 },
+    tetromino: null,
+    score: 0,
+    speedLevel: 1
+};
+
+let nextTetromino = randomTetromino();
+let gameOver = false;
+let dropInterval = 1000;
+let lastDropTime = 0;
+
+function drawNextPiece() {
+    nextContext.clearRect(0, 0, nextCanvas.width, nextCanvas.height);
+    nextTetromino.shape.forEach((row, y) => {
+        row.forEach((value, x) => {
+            if (value !== 0) {
+                nextContext.fillStyle = nextTetromino.darkColor; // Használjuk a sötétebb színt
+                nextContext.fillRect(x + 1, y + 1, 1, 1);
+                nextContext.strokeStyle = 'white';
+                nextContext.lineWidth = 0.05;
+                nextContext.strokeRect(x + 1, y + 1, 1, 1);
+            }
+        });
+    });
+}
+
+function playerReset() {
+    player.tetromino = nextTetromino;
+    player.pos.y = 0;
+    player.pos.x = (arena[0].length / 2 | 0) - (player.tetromino.shape[0].length / 2 | 0);
+
+    if (collide(arena, player)) {
+        endGame();
+    } else {
+        nextTetromino = randomTetromino();
+        drawNextPiece();
+    }
+}
+
+function endGame() {
+    gameOver = true;
+    document.getElementById('final-score').innerText = 'Score: ' + player.score;
+    document.getElementById('tetris').style.display = 'none';
+    document.getElementById('score-box').style.display = 'none';
+    document.getElementById('next-piece-box').style.display = 'none'; // Eltüntetés
+    document.getElementById('game-over').style.display = 'block';
+}
+
+function restartGame() {
+    gameOver = false;
+    arena.forEach(row => row.fill(0));
+    player.score = 0;
+    player.speedLevel = 1;
+    dropInterval = 1000;
+    updateScore();
+    document.getElementById('game-over').style.display = 'none';
+    document.getElementById('menu').style.display = 'block';
+    document.getElementById('tetris').style.display = 'none';
+    document.getElementById('score-box').style.display = 'none';
+    document.getElementById('next-piece-box').style.display = 'none';
+}
+
+
+function collide(arena, player) {
+    const [m, o] = [player.tetromino.shape, player.pos];
+    for (let y = 0; y < m.length; ++y) {
+        for (let x = 0; x < m[y].length; ++x) {
+            if (m[y][x] !== 0 &&
+                (arena[y + o.y] &&
+                arena[y + o.y][x + o.x]) !== 0) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+function merge(arena, player) {
+    player.tetromino.shape.forEach((row, y) => {
+        row.forEach((value, x) => {
+            if (value !== 0) {
+                arena[y + player.pos.y][x + player.pos.x] = player.tetromino.color; // A tetrominó színét használjuk
+            }
+        });
+    });
+}
+
+function arenaSweep() {
+    let rowCount = 1;
+    outer: for (let y = arena.length - 1; y >= 0; --y) {
+        for (let x = 0; x < arena[y].length; ++x) {
+            if (arena[y][x] === 0) {
+                continue outer;
+            }
+        }
+
+        // Kiválasztjuk az eltávolítandó sort
+        const row = arena[y];
+
+        // Átmeneti animáció a sor villogtatásához
+        for (let x = 0; x < row.length; ++x) {
+            // Canvas-on a sor háttérszínét változtatjuk
+            context.fillStyle = 'white';
+            context.fillRect(x, y, 1, 1);
+        }
+
+        // Késleltetés az animáció végrehajtásához
+        setTimeout(() => {
+            arena.splice(y, 1); // Eltávolítjuk a sort
+            arena.unshift(new Array(arena[0].length).fill(0)); // Új üres sor a tetejére
+        }, 150); // 150ms késleltetés
+
+        // Pontszám frissítése
+        player.score += rowCount * 100;
+        rowCount *= 2;
+
+        // Sebesség növelése
+        if (player.score >= player.speedLevel * 500) {
+            player.speedLevel++;
+            dropInterval = Math.max(100, dropInterval - 250);
+        }
+    }
+}
+
+
+function playerDrop() {
+    player.pos.y++;
+    if (collide(arena, player)) {
+        player.pos.y--;
+        merge(arena, player);
+        playerReset();
+        arenaSweep();
+        updateScore();
+    }
+}
+
+function playerMove(dir) {
+    player.pos.x += dir;
+    if (collide(arena, player)) {
+        player.pos.x -= dir;
+    }
+}
+
+function playerRotate() {
+    const temp = player.tetromino.shape;
+    player.tetromino.shape = temp[0].map((_, i) => temp.map(row => row[i]).reverse());
+    if (collide(arena, player)) {
+        player.tetromino.shape = temp;
+    }
+}
+
+function draw() {
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    arena.forEach((row, y) => {
+        row.forEach((value, x) => {
+            if (value !== 0) {
+                context.fillStyle = value; // Az itt tárolt színt használjuk
+                context.fillRect(x, y, 1, 1);
+            }
+        });
+    });
+
+    // Aktuális tetrominó rajzolása a játéktéren
+    player.tetromino.shape.forEach((row, y) => {
+        row.forEach((value, x) => {
+            if (value !== 0) {
+                context.fillStyle = player.tetromino.color; // Az aktuális tetrominó színét használjuk
+                context.fillRect(x + player.pos.x, y + player.pos.y, 1, 1);
+                context.strokeStyle = 'white';
+                context.lineWidth = 0.05;
+                context.strokeRect(x + player.pos.x, y + player.pos.y, 1, 1);
+            }
+        });
+    });
+}
+
+function updateScore() {
+    document.querySelector('#score-box p').innerText = 'Score: ' + player.score;
+}
+
+
+function update(time = 0) {
+    if (gameOver) return;
+
+    const deltaTime = time - lastDropTime;
+    if (deltaTime > dropInterval) {
+        playerDrop();
+        lastDropTime = time;
+    }
+
+    draw();
+    requestAnimationFrame(update);
+}
+function hardDrop() {
+    const ghostPos = getGhostPosition();
+    player.pos.y = ghostPos.y;
+    merge(arena, player);
+    playerReset();
+    arenaSweep();
+    updateScore();
+}
+
+document.addEventListener('keydown', (event) => {
+    if (gameOver) return;
+    if (event.key === 'w') { // Forgatás
+        playerRotate();
+    } else if (event.key === 'a') { // Balra
+        playerMove(-1);
+    } else if (event.key === 'd') { // Jobbra
+        playerMove(1);
+    } else if (event.key === 's') { // Lefele léptetés
+        playerDrop();
+    } else if (event.key === ' ') { // Space: Hard Drop
+        hardDrop();
+    }
+});
+
+
+document.getElementById('start-button').addEventListener('click', () => {
+    nextTetromino = randomTetromino();
+    playerReset();
+    updateScore();
+    document.getElementById('menu').style.display = 'none';
+    document.getElementById('tetris').style.display = 'block';
+    document.getElementById('score-box').style.display = 'block';
+    document.getElementById('next-piece-box').style.display = 'block'; // Megjelenítjük a következő tetrominót
+    update();
+});
+
+function getGhostPosition() {
+    const ghostPos = { ...player.pos }; // Másolat az eredeti tetrominó pozíciójáról
+    while (!collide(arena, { ...player, pos: ghostPos })) {
+        ghostPos.y++;
+    }
+    ghostPos.y--; // Egy lépést feljebb, ahol már nem ütközik
+    return ghostPos;
+}
+function draw() {
+    context.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Megjelenítjük a háttér mátrixot
+    arena.forEach((row, y) => {
+        row.forEach((value, x) => {
+            if (value !== 0) {
+                context.fillStyle = value;
+                context.fillRect(x, y, 1, 1);
+                context.strokeStyle = 'white';
+                context.lineWidth = 0.05;
+                context.strokeRect(x, y, 1, 1);
+            }
+        });
+    });
+
+    // Megjelenítjük a szellemalakzatot
+    const ghostPos = getGhostPosition();
+    player.tetromino.shape.forEach((row, y) => {
+        row.forEach((value, x) => {
+            if (value !== 0) {
+                context.fillStyle = player.tetromino.color;
+                context.globalAlpha = 0.3; // Halvány szín a szellemalakzatnak
+                context.fillRect(ghostPos.x + x, ghostPos.y + y, 1, 1);
+
+                // Körvonal a szellemalakzatnak
+                context.strokeStyle = 'rgba(255, 255, 255, 0.3)'; // Halványabb fehér körvonal
+                context.lineWidth = 0.05;
+                context.strokeRect(ghostPos.x + x, ghostPos.y + y, 1, 1);
+                
+                context.globalAlpha = 1.0; // Visszaállítás
+            }
+        });
+    });
+
+    // Megjelenítjük az aktuális tetrominót
+    player.tetromino.shape.forEach((row, y) => {
+        row.forEach((value, x) => {
+            if (value !== 0) {
+                context.fillStyle = player.tetromino.color;
+                context.fillRect(player.pos.x + x, player.pos.y + y, 1, 1);
+
+                // Körvonal az aktuális tetrominónak
+                context.strokeStyle = 'white';
+                context.lineWidth = 0.05;
+                context.strokeRect(player.pos.x + x, player.pos.y + y, 1, 1);
+            }
+        });
+    });
+}
+
+
+
+document.getElementById('restart-button').addEventListener('click', () => {
+    restartGame();
+});
+
+    
+        </script>
+    </body>
+    </html>
