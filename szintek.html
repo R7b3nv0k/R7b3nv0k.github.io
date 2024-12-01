@@ -269,29 +269,65 @@ function playerReset() {
         drawNextPiece();
     }
 }
+function createGameOverButtons() {
+    const gameOverDiv = document.getElementById('game-over');
+
+    // Ellenőrizzük, hogy a gombok már létre vannak-e hozva
+    if (!document.querySelector('#game-over #restart-button')) {
+        const restartButton = document.createElement('button');
+        restartButton.id = 'restart-button';
+        restartButton.innerText = 'Újra';
+        restartButton.onclick = restartGame;
+        gameOverDiv.appendChild(restartButton);
+    }
+
+    if (!document.querySelector('#game-over #back-button')) {
+        const backButton = document.createElement('button');
+        backButton.id = 'back-button';
+        backButton.innerText = 'Vissza a szintekhez';
+        backButton.onclick = () => {
+            document.getElementById('menu').style.display = 'block';
+            document.getElementById('game-over').style.display = 'none';
+        };
+        gameOverDiv.appendChild(backButton);
+    }
+}
+
+
 
 function endGame() {
     gameOver = true;
     document.getElementById('final-score').innerText = 'Pontszámod: ' + player.score;
     document.getElementById('tetris').style.display = 'none';
     document.getElementById('score-box').style.display = 'none';
-    document.getElementById('next-piece-box').style.display = 'none'; // Eltüntetés
+    document.getElementById('next-piece-box').style.display = 'none';
     document.getElementById('game-over').style.display = 'block';
+
+    // Csak egyszer hoz létre gombokat
+    createGameOverButtons();
 }
+
+
 
 function restartGame() {
     gameOver = false;
-    arena.forEach(row => row.fill(0));
-    player.score = 0;
+    arena.forEach(row => row.fill(0)); // Játékmező törlése
+    player.score = 0; // Pontszám visszaállítása
     player.speedLevel = 1;
-    dropInterval = 1000;
-    updateScore();
+    dropInterval = 1000; // Sebesség visszaállítása
+
+    document.getElementById('final-score').innerText = ''; // Pontszám törlése a vége képernyőről
     document.getElementById('game-over').style.display = 'none';
     document.getElementById('menu').style.display = 'block';
+
     document.getElementById('tetris').style.display = 'none';
     document.getElementById('score-box').style.display = 'none';
     document.getElementById('next-piece-box').style.display = 'none';
+    document.getElementById('restart-button').style.display = 'block';
+    document.getElementById('back-button').style.display = 'block'
 }
+
+
 
 
 function collide(arena, player) {
@@ -560,23 +596,7 @@ function arenaSweep() {
     }
 }
 
-// 3. Játék újraindítása a LEVEL 1 szinthez
-function startLevel1() {
-    gameOver = false;
-    arena.forEach(row => row.fill(0));
-    player.score = 0;
-    player.speedLevel = 1;
-    dropInterval = 1000;
-    document.getElementById('game-over').style.display = 'none';
-    document.getElementById('menu').style.display = 'none';
-    document.getElementById('tetris').style.display = 'block';
-    document.getElementById('score-box').style.display = 'block';
-    document.getElementById('next-piece-box').style.display = 'block';
-    nextTetromino = randomTetromino();
-    playerReset();
-    updateScore();
-    update();
-}
+
 
 // 4. Játék vége, ha a tetrominók elérik a pálya tetejét
 function playerReset() {
@@ -655,197 +675,7 @@ function removeEndScreenElements() {
     if (backToLevelsButton) backToLevelsButton.remove();
 }
 ////////////////////////////////////////////////////////////////////////////////
-function startLevel2() {
-    nextTetromino = randomTetromino();
-    playerReset();
-    updateScore();
 
-    // Második szint beállításai
-    player.score = 0; // Nullázni kell az aktuális pontszámot
-    player.speedLevel = 1; // Szint alap sebesség szintje
-    dropInterval = 800; // Gyorsabb kezdési sebesség (kevesebb intervallum)
-
-    document.getElementById('menu').style.display = 'none';
-    document.getElementById('tetris').style.display = 'block';
-    document.getElementById('score-box').style.display = 'block';
-    document.getElementById('next-piece-box').style.display = 'block';
-
-    // Friss célpont szöveg megjelenítése
-    document.querySelector('#next-piece-box p:last-child').innerText = "Érj el 1000 pontot!";
-    
-    update();
-}
-function arenaSweep() {
-    let rowCount = 1;
-    outer: for (let y = arena.length - 1; y >= 0; --y) {
-        for (let x = 0; x < arena[y].length; ++x) {
-            if (arena[y][x] === 0) {
-                continue outer;
-            }
-        }
-        const row = arena.splice(y, 1)[0].fill(0);
-        arena.unshift(row);
-        ++y;
-
-        player.score += rowCount * 100;
-        rowCount *= 2;
-
-        if (player.score >= 500 * player.speedLevel) {
-            player.speedLevel++;
-            dropInterval = Math.max(100, dropInterval - 250);
-        }
-
-        // Szintteljesítés ellenőrzése
-        if (player.score >= 1000) {
-            endGame();
-            document.getElementById('final-score').innerText = "Második szint teljesítve!";
-        }
-    }
-}
-////////////////////////////////////////////////////////////////////////////////////
-function startLevel3() {
-    nextTetromino = randomTetromino();
-    playerReset();
-    updateScore();
-
-    // Második szint beállításai
-    player.score = 0; // Nullázni kell az aktuális pontszámot
-    player.speedLevel = 1; // Szint alap sebesség szintje
-    dropInterval = 800; // Gyorsabb kezdési sebesség (kevesebb intervallum)
-
-    document.getElementById('menu').style.display = 'none';
-    document.getElementById('tetris').style.display = 'block';
-    document.getElementById('score-box').style.display = 'block';
-    document.getElementById('next-piece-box').style.display = 'block';
-
-    // Friss célpont szöveg megjelenítése
-    document.querySelector('#next-piece-box p:last-child').innerText = "Érj el 1500  pontot!";
-    
-    update();
-}
-function arenaSweep() {
-    let rowCount = 1;
-    outer: for (let y = arena.length - 1; y >= 0; --y) {
-        for (let x = 0; x < arena[y].length; ++x) {
-            if (arena[y][x] === 0) {
-                continue outer;
-            }
-        }
-        const row = arena.splice(y, 1)[0].fill(0);
-        arena.unshift(row);
-        ++y;
-
-        player.score += rowCount * 100;
-        rowCount *= 2;
-
-        if (player.score >= 500 * player.speedLevel) {
-            player.speedLevel++;
-            dropInterval = Math.max(100, dropInterval - 250);
-        }
-
-        // Szintteljesítés ellenőrzése
-        if (player.score >= 1500) {
-            endGame();
-            document.getElementById('final-score').innerText = "Harmadik szint teljesítve!";
-        }
-    }
-}
-//////////////////////////////////////////////////////////////////////////////////////////////////
-function startLevel4() {
-    nextTetromino = randomTetromino();
-    playerReset();
-    updateScore();
-
-    // Második szint beállításai
-    player.score = 0; // Nullázni kell az aktuális pontszámot
-    player.speedLevel = 1; // Szint alap sebesség szintje
-    dropInterval = 800; // Gyorsabb kezdési sebesség (kevesebb intervallum)
-
-    document.getElementById('menu').style.display = 'none';
-    document.getElementById('tetris').style.display = 'block';
-    document.getElementById('score-box').style.display = 'block';
-    document.getElementById('next-piece-box').style.display = 'block';
-
-    // Friss célpont szöveg megjelenítése
-    document.querySelector('#next-piece-box p:last-child').innerText = "Érj el 2000  pontot!";
-    
-    update();
-}
-function arenaSweep() {
-    let rowCount = 1;
-    outer: for (let y = arena.length - 1; y >= 0; --y) {
-        for (let x = 0; x < arena[y].length; ++x) {
-            if (arena[y][x] === 0) {
-                continue outer;
-            }
-        }
-        const row = arena.splice(y, 1)[0].fill(0);
-        arena.unshift(row);
-        ++y;
-
-        player.score += rowCount * 100;
-        rowCount *= 2;
-
-        if (player.score >= 500 * player.speedLevel) {
-            player.speedLevel++;
-            dropInterval = Math.max(100, dropInterval - 250);
-        }
-
-        // Szintteljesítés ellenőrzése
-        if (player.score >= 2000) {
-            endGame();
-            document.getElementById('final-score').innerText = "Negyedik szint teljesítve!";
-        }
-    }
-}
-///////////////////////////////////////////////////////////////////////////////////////////////////////////
-function startLevel5() {
-    nextTetromino = randomTetromino();
-    playerReset();
-    updateScore();
-
-    // Második szint beállításai
-    player.score = 0; // Nullázni kell az aktuális pontszámot
-    player.speedLevel = 1; // Szint alap sebesség szintje
-    dropInterval = 800; // Gyorsabb kezdési sebesség (kevesebb intervallum)
-
-    document.getElementById('menu').style.display = 'none';
-    document.getElementById('tetris').style.display = 'block';
-    document.getElementById('score-box').style.display = 'block';
-    document.getElementById('next-piece-box').style.display = 'block';
-
-    // Friss célpont szöveg megjelenítése
-    document.querySelector('#next-piece-box p:last-child').innerText = "Érj el 2200  pontot!";
-    
-    update();
-}
-function arenaSweep() {
-    let rowCount = 1;
-    outer: for (let y = arena.length - 1; y >= 0; --y) {
-        for (let x = 0; x < arena[y].length; ++x) {
-            if (arena[y][x] === 0) {
-                continue outer;
-            }
-        }
-        const row = arena.splice(y, 1)[0].fill(0);
-        arena.unshift(row);
-        ++y;
-
-        player.score += rowCount * 100;
-        rowCount *= 2;
-
-        if (player.score >= 500 * player.speedLevel) {
-            player.speedLevel++;
-            dropInterval = Math.max(100, dropInterval - 250);
-        }
-
-        // Szintteljesítés ellenőrzése
-        if (player.score >= 2200) {
-            endGame();
-            document.getElementById('final-score').innerText = "Ötödik szint teljesítve!";
-        }
-    }
-}
 
 
     </script>
