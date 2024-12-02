@@ -553,6 +553,61 @@ document.getElementById('restart-button').addEventListener('click', () => {
     restartGame();
 });
 
+function addRandomObstacles() {
+    const obstacleCount = Math.floor(Math.random() * 3) + 1; // Véletlenül 1-3 akadály
+    for (let i = 0; i < obstacleCount; i++) {
+        const x = Math.floor(Math.random() * arena[0].length); // Véletlen oszlop
+        const y = Math.floor(Math.random() * 5); // Véletlen hely a felső 5 sorban
+        if (arena[y][x] === 0) {
+            arena[y][x] = 'gray'; // Szürke színű akadály
+        }
+    }
+}
+
+// Hozzáadjuk a játékmenethez, pl. minden 30 másodpercben
+setInterval(() => {
+    if (!gameOver) {
+        addRandomObstacles();
+    }
+}, 30000); // 30 másodpercenként
+
+function randomizeGravity() {
+    if (!gameOver) {
+        dropInterval = Math.random() * 500 + 200; // 200 ms és 700 ms közötti véletlen érték
+    }
+}
+
+// Időzítővel beállíthatjuk
+setInterval(() => {
+    if (!gameOver) {
+        randomizeGravity();
+    }
+}, 15000); // 15 másodpercenként
+
+function activateBomb() {
+    // Törli az alsó 3 sort
+    for (let y = arena.length - 1; y >= arena.length - 3; y--) {
+        arena[y].fill(0);
+    }
+    updateScore(); // Pontszám frissítése
+}
+
+// Véletlenszerű power-up megjelenítése
+function dropPowerUp() {
+    const dropChance = Math.random();
+    if (dropChance < 0.1) { // 10% eséllyel bomba jelenik meg
+        activateBomb();
+    }
+}
+
+// Időzítővel megvalósítjuk
+setInterval(() => {
+    if (!gameOver) {
+        dropPowerUp();
+    }
+}, 20000); // 20 másodpercenként
+
+
     
         </script>
     </body>
