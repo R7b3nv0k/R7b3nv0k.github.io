@@ -150,10 +150,6 @@
     <div id="menu">
         <button onclick="window.location.href='index.html';">Vissza a fő oldalra</button>
         <button id="level-1-button" onclick="startLevel1()">LEVEL 1</button>
-        <button id="level-1-button" onclick="startLevel2()">LEVEL 2</button>
-        <button id="level-1-button" onclick="startLevel3()">LEVEL 3</button>
-        <button id="level-1-button" onclick="startLevel4()">LEVEL 4</button>
-        <button id="level-1-button" onclick="startLevel5()">LEVEL 5</button>
         <button onclick="window.location.href='tetrismas.html';" class="gothic-button">...</button>
     </div>
 
@@ -271,16 +267,6 @@ function playerReset() {
 }
 function createGameOverButtons() {
     const gameOverDiv = document.getElementById('game-over');
-
-    // Ellenőrizzük, hogy a gombok már létre vannak-e hozva
-    if (!document.querySelector('#game-over #restart-button')) {
-        const restartButton = document.createElement('button');
-        restartButton.id = 'restart-button';
-        restartButton.innerText = 'Újra';
-        restartButton.onclick = restartGame;
-        gameOverDiv.appendChild(restartButton);
-    }
-
     if (!document.querySelector('#game-over #back-button')) {
         const backButton = document.createElement('button');
         backButton.id = 'back-button';
@@ -304,31 +290,7 @@ function endGame() {
     document.getElementById('game-over').style.display = 'block';
 
     // Csak egyszer hoz létre gombokat
-    createGameOverButtons();
 }
-
-
-
-function restartGame() {
-    gameOver = false;
-    arena.forEach(row => row.fill(0)); // Játékmező törlése
-    player.score = 0; // Pontszám visszaállítása
-    player.speedLevel = 1;
-    dropInterval = 1000; // Sebesség visszaállítása
-
-    document.getElementById('final-score').innerText = ''; // Pontszám törlése a vége képernyőről
-    document.getElementById('game-over').style.display = 'none';
-    document.getElementById('menu').style.display = 'block';
-
-    document.getElementById('tetris').style.display = 'none';
-    document.getElementById('score-box').style.display = 'none';
-    document.getElementById('next-piece-box').style.display = 'none';
-    document.getElementById('restart-button').style.display = 'block';
-    document.getElementById('back-button').style.display = 'block'
-}
-
-
-
 
 function collide(arena, player) {
     const [m, o] = [player.tetromino.shape, player.pos];
@@ -567,7 +529,6 @@ function endGameWithMessage(message) {
 
     // "Újra" gomb hozzáadása
     const restartButton = document.createElement("button");
-    restartButton.innerText = "Újra";
     restartButton.onclick = startLevel1;
     document.getElementById("game-over").appendChild(restartButton);
 }
@@ -616,11 +577,10 @@ function showEndButtons() {
     let retryButton = document.getElementById('retryButton');
     let backButton = document.getElementById('backButton');
 
-    // Ha a gombok már léteznek, akkor ne adjuk hozzá újra
+
     if (!retryButton) {
         retryButton = document.createElement('button');
         retryButton.id = 'retryButton';
-        retryButton.innerText = 'Újra';
         retryButton.addEventListener('click', retryLevel); // Írd meg a retryLevel függvényt, ami újraindítja a szintet
         document.body.appendChild(retryButton);
     }
@@ -647,7 +607,6 @@ function showEndScreen(message) {
     // Újra gomb létrehozása
     const retryButton = document.createElement("button");
     retryButton.id = "retryButton";
-    retryButton.textContent = "Újra";
     retryButton.onclick = () => {
         removeEndScreenElements();
         startGame();
